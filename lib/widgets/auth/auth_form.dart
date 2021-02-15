@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 
 class AuthForm extends StatefulWidget {
+  final void Function(
+    BuildContext ctx,
+    String email,
+    String password,
+    String username,
+    bool isLogin
+  ) submitHandler;
+
+  AuthForm(this.submitHandler);
+
   @override
   _AuthFormState createState() => _AuthFormState();
 }
 
 class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>();
+  final _passwordController = TextEditingController();
   bool _isLogin = true;
   String _email = '';
   String _username = '';
@@ -21,10 +32,8 @@ class _AuthFormState extends State<AuthForm> {
     }
 
     _formKey.currentState.save();
-    print(_email);
-    print(_username);
-    print(_password);
 
+    widget.submitHandler(context, _email, _password, _username, _isLogin);
   }
 
   @override
@@ -70,6 +79,7 @@ class _AuthFormState extends State<AuthForm> {
                     ),
                   TextFormField(
                     key: ValueKey('password'),
+                    controller: _passwordController,
                     validator: (value) {
                       if (value.isEmpty || value.length < 7) {
                         return 'Password must be at least 7 characters long.';
@@ -82,6 +92,15 @@ class _AuthFormState extends State<AuthForm> {
                       labelText: 'Password',
                     ),
                   ),
+                  if (!_isLogin)
+                    TextFormField(
+                      key: ValueKey('confirmPassword'),
+                      validator: (value) => value != _passwordController.text ? 'The passwords must be the same' : null,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Confirm password',
+                      ),
+                    ),
                   SizedBox(height: 12),
                   RaisedButton(
                     child: Text(_isLogin ? 'Login' : 'Sign up'),
