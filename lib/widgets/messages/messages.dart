@@ -25,6 +25,7 @@ class Messages extends StatelessWidget {
               itemCount: messages.length,
               itemBuilder: (ctx, index) => MessageBubble(
                 messages[index]['text'],
+                messages[index]['username'],
                 messages[index]['userId'] == futureSnapshot.data.uid,
                 key: ValueKey(messages[index].documentID),
               ),
