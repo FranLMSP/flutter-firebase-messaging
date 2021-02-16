@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../widgets/auth/auth_form.dart';
 
@@ -13,8 +15,15 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   final _auth = FirebaseAuth.instance;
   bool _isLoading = false;
+  bool _disposed = false;
 
-  Future<void> _submitAuthForm(BuildContext ctx, String email, String password, String username, bool isLogin) async {
+  @override
+  void dispose() {
+    super.dispose();
+    _disposed = true;
+  }
+
+  Future<void> _submitAuthForm(BuildContext ctx, String email, String password, String username, File image, bool isLogin) async {
     AuthResult authResult;
 
     try {
@@ -25,9 +34,13 @@ class _AuthScreenState extends State<AuthScreen> {
         authResult = await _auth.signInWithEmailAndPassword(email: email, password: password);
       } else {
         authResult = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+        final ref = FirebaseStorage.instance.ref().child('user_image').child(authResult.user.uid + '.jpg');
+        await ref.putFile(image).onComplete;
+        final imageUrl = await ref.getDownloadURL();
         await Firestore.instance.collection('users').document(authResult.user.uid).setData({
           'username': username,
           'email': email,
+          'image_url': imageUrl,
         });
       }
 
@@ -47,9 +60,11 @@ class _AuthScreenState extends State<AuthScreen> {
       print(error);
     }
 
-    setState(() {
-      _isLoading = false;
-    });
+    if (!_disposed) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
 
   }
 

@@ -9,6 +9,7 @@ class AuthForm extends StatefulWidget {
     String email,
     String password,
     String username,
+    File image,
     bool isLogin
   ) submitHandler;
   final bool isLoading;
@@ -46,7 +47,7 @@ class _AuthFormState extends State<AuthForm> {
 
     _formKey.currentState.save();
 
-    widget.submitHandler(context, _email, _password, _username, _isLogin);
+    widget.submitHandler(context, _email, _password, _username, _image, _isLogin);
   }
 
   void _pickImage(File image) {
